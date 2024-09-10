@@ -162,7 +162,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   acceleration: 5
-  maxSpeed: 20
+  maxSpeed: 15
   turnSpeed: 200
   drag: 0.5
   bdrag: 3
