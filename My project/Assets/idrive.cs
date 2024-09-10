@@ -12,7 +12,9 @@ public class idrive : MonoBehaviour
     public float drag = 3f;
     public float bdrag = 3f;
     public float driftFactor = 0.95f;
+    public float maxDriftFactorIncrease = 0.3f;
     public float driftRecoverySpeed = 2f;
+    public float maxDriftRecoverySpeedIncrease = 3f;
 
     private float currentSpeed = 0f;
     private float rotation = 0f;
@@ -20,6 +22,8 @@ public class idrive : MonoBehaviour
 
     private float originalMaxSpeed;
     private float originalTurnSpeed;
+    private float originalDriftFactor;
+    private float originalDriftRecoverySpeed;
     private float boostMeter = 0f; // Represents the fill level of the boost meter
     public float boostDecayRate = 0.5f;
     public float maxBoost = 100f;
@@ -33,6 +37,8 @@ public class idrive : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         originalMaxSpeed = maxSpeed;
         originalTurnSpeed = turnSpeed;
+        originalDriftFactor = driftFactor;
+        originalDriftRecoverySpeed = driftRecoverySpeed;
     }
 
     // Update is called once per frame
@@ -100,6 +106,9 @@ public class idrive : MonoBehaviour
         float boostFraction = boostMeter / maxBoost;
         maxSpeed = maxSpeed + speedup;
         turnSpeed = originalTurnSpeed + (boostFraction * maxTurnSpeedIncrease);
+
+        driftFactor = originalDriftFactor - (boostFraction * maxDriftFactorIncrease); // Reduces drift control with higher boost
+        driftRecoverySpeed = originalDriftRecoverySpeed - (boostFraction * maxDriftRecoverySpeedIncrease); // Slows down drift recovery with higher boost
     }
 
     void HandleBoostAndInstability()
@@ -115,6 +124,8 @@ public class idrive : MonoBehaviour
             {
                 maxSpeed = originalMaxSpeed;
                 turnSpeed = originalTurnSpeed;
+                driftFactor = originalDriftFactor;
+                driftRecoverySpeed = originalDriftRecoverySpeed;
             }
         }
     }

@@ -169,7 +169,9 @@ MonoBehaviour:
   drag: 0.5
   bdrag: 3
   driftFactor: 0.95
+  maxDriftFactorIncrease: 0.5
   driftRecoverySpeed: 2
+  maxDriftRecoverySpeedIncrease: 3
   boostDecayRate: 5
   maxBoost: 100
-  speedup: 0.25
+  speedup: 0.5
