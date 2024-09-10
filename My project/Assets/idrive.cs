@@ -6,20 +6,39 @@ public class idrive : MonoBehaviour
 {
     public float acceleration = 5f;
     public float maxSpeed = 20f;
+    public float maxSpeedIncrease = 10f;
+    public float maxTurnSpeedIncrease = 100f;
     public float turnSpeed = 200f;
     public float drag = 3f;
     public float bdrag = 3f;
     public float driftFactor = 0.95f;
+    public float maxDriftFactorIncrease = 0.3f;
     public float driftRecoverySpeed = 2f;
+    public float maxDriftRecoverySpeedIncrease = 3f;
 
     private float currentSpeed = 0f;
     private float rotation = 0f;
     private Rigidbody2D rb;
 
+    private float originalMaxSpeed;
+    private float originalTurnSpeed;
+    private float originalDriftFactor;
+    private float originalDriftRecoverySpeed;
+    private float boostMeter = 0f; // Represents the fill level of the boost meter
+    public float boostDecayRate = 0.5f;
+    public float maxBoost = 100f;
+    public float speedup = 1f;
+
+    
+
     // Start is called before the first frame update
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
+        originalMaxSpeed = maxSpeed;
+        originalTurnSpeed = turnSpeed;
+        originalDriftFactor = driftFactor;
+        originalDriftRecoverySpeed = driftRecoverySpeed;
     }
 
     // Update is called once per frame
@@ -72,5 +91,42 @@ public class idrive : MonoBehaviour
         // Apply movement and rotation to Rigidbody2D
         rb.velocity = transform.up * currentSpeed; // Move car forward
         rb.rotation = rotation;
+
+        HandleBoostAndInstability();
+
+        if(currentSpeed > maxSpeed){
+            currentSpeed = maxSpeed;
+        }
+    }
+
+    public void BoostSpeed(float speedIncrease)
+    {
+        boostMeter = Mathf.Clamp(boostMeter + speedIncrease, 0f, maxBoost); // Increase the boost meter, clamp to max
+
+        float boostFraction = boostMeter / maxBoost;
+        maxSpeed = maxSpeed + speedup;
+        turnSpeed = originalTurnSpeed + (boostFraction * maxTurnSpeedIncrease);
+
+        driftFactor = originalDriftFactor - (boostFraction * maxDriftFactorIncrease); // Reduces drift control with higher boost
+        driftRecoverySpeed = originalDriftRecoverySpeed - (boostFraction * maxDriftRecoverySpeedIncrease); // Slows down drift recovery with higher boost
+    }
+
+    void HandleBoostAndInstability()
+    {
+        if (boostMeter > 0)
+        {
+
+            // Gradually decay the boost meter
+            boostMeter -= boostDecayRate * Time.deltaTime;
+
+            // Reduce instability over time as the boost meter depletes
+            if (boostMeter <= 0)
+            {
+                maxSpeed = originalMaxSpeed;
+                turnSpeed = originalTurnSpeed;
+                driftFactor = originalDriftFactor;
+                driftRecoverySpeed = originalDriftRecoverySpeed;
+            }
+        }
     }
 }
